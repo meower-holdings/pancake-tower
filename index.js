@@ -56,8 +56,6 @@ async function checkFeeds() {
         const existingPosts = await Posts.find({link: {$in: feed.items.map(p => p.link)}})
         const nonexistingPosts = feed.items.filter(item => !existingPosts.some(post => post.link === item.link))
 
-        console.log(existingPosts, nonexistingPosts)
-
         nonexistingPosts.forEach(async post => {
             if(service.name === "tumblr" && post.title === "Photo") post.title = undefined;
             if(post.title) post.title = he.decode(post.title);
