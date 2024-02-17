@@ -39,7 +39,7 @@ app.post("/services/:id", async function(req, res) {
     if(!service) return res.status(404).send("Service not found");
 
     await makePost({
-        type: req.query.id,
+        type: req.params.id,
         link: req.body.link,
         snippet: req.body.snippet,
         duration: req.body.duration
