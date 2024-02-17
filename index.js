@@ -25,9 +25,10 @@ app.get("/services/:id", async function(req, res) {
     if(!req.query.timestamp) return res.status(400).send("A timestamp is required");
 
     const posts = await Posts.find({type: req.params.id, likedAt: {$gt: parseInt(req.query.timestamp)}})
+
     return res.json({
         count: posts.length,
-        snippet: posts.filter(post => post.snippet)?.map(post => post.snippet).sort(() => Math.random() - 0.5).slice(0,9).join(" /// ") + " ///"
+        snippet: posts.filter(post => post.snippet).sort((a, b) => {return new Date(b.likedAt) - new Date(a.likedAt);}).map(post => post.snippet).slice(0,99).join(" /// ") + " ///"
     });
 })
 
