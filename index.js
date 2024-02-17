@@ -53,7 +53,7 @@ async function checkFeeds() {
     servicesWithRSS.forEach(async service => {
         const feed = await parser.parseURL(service.rssFeed);
 
-        const existingPosts = await Posts.find({url: {$in: feed.items.map(p => p.link)}})
+        const existingPosts = await Posts.find({link: {$in: feed.items.map(p => p.link)}})
         const nonexistingPosts = feed.items.filter(item => !existingPosts.some(post => post.link === item.url))
 
         nonexistingPosts.forEach(async post => {
