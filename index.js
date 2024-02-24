@@ -38,6 +38,8 @@ app.post("/services/:id", async function(req, res) {
 
     const service = await Services.findOne({name: req.params.id})
     if(!service) return res.status(404).send("Service not found");
+    const post = await Posts.findOne({type: req.params.id, link: req.body.link})
+    if(post) return res.status(409).send("This post has already been submitted");
 
     await makePost({
         type: req.params.id,
