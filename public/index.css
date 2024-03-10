@@ -35,3 +35,10 @@
 .goofymarquee {
     white-space: nowrap;
 }
+
+.userpreview {
+    font-size: 0.7em;
+    font-style: italic;
+    color: gray;
+    transition: opacity 1s ease;
+}

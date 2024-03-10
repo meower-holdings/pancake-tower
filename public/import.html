@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>pancake tower</title>
+        <script type="text/javascript" src="/resources/crawler.js"></script>
+        <link rel="stylesheet" href="/index.css">
+        <link rel="preload" href="/resources/throb.gif" as="image" />
+
+        <script>
+            window.addEventListener("DOMContentLoaded", async function() {
+                const services = await (await fetch("/services")).json()
+                services.forEach(function(service) {
+                    document.querySelector("#services").add(new Option(service.display, service.name))
+                })
+            })
+
+            async function formHandler(e) {
+                document.querySelector("[type=submit]").innerHTML = "<img src='/resources/throb.gif'>"
+                document.querySelector("[type=submit]").disabled = true;
+                document.querySelector("#errorarea").innerHTML = "";
+
+                const formData = new FormData(e.target)
+                const convertedSnowflake = (new Date(Number(BigInt(formData.get("snowflake")) >> 22n) + 1420070400000)).getTime()
+
+                await fetch(`/services/${formData.get("service")}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        link: formData.get("url"),
+                        snippet: formData.get("snippet"),
+                        likedAt: convertedSnowflake
+                    })
+                }).then(function(e) {
+                    if(e.status === 409) {
+                        document.querySelector("#errorarea").innerHTML = "Already imported."
+                    } else if(e.status === 200) {
+                        document.querySelector("#errorarea").innerHTML = "Successfully imported."
+
+                        document.querySelector("#snowflake").value = "";
+                        document.querySelector("#snippet").value = "";
+                        document.querySelector("#url").value = "";
+                    }
+                }).catch(e => {
+                    console.error(e)
+                    document.querySelector("#errorarea").innerHTML = "Failed for weird reasons, check console"
+                }).finally(function() {
+                    document.querySelector("[type=submit]").innerHTML = "submit"
+                    document.querySelector("[type=submit]").disabled = false;
+                })
+            }
+        </script>
+    </head>
+    <body>
+        <h1>import lost data</h1>
+        <form onsubmit="event.preventDefault();formHandler(event);">
+            <label>service type <select required id="services" name="service"></select></label><br/><br/>
+            <label>discord snowflake <input required type="number" id="snowflake" name="snowflake"/></label><br/>
+            <label>snippet <input type="text" id="snippet" name="snippet"/></label><br/>
+            <label>url <input required type="text" id="url" name="url"/></label> <button type="submit">submit</button>
+        </form>
+
+        <pre id="errorarea"></pre>
+    </body>
+</html>

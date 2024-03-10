@@ -43,12 +43,29 @@ app.post("/services/:id", async function(req, res) {
 
     await makePost({
         type: req.params.id,
+        likedAt: req.body.likedAt,
         link: req.body.link,
         snippet: req.body.snippet,
         duration: req.body.duration
     })
 
     return res.status(200).send("Post data captured :3")
+})
+
+app.get("/services/:id/usercount", async function(req, res) {
+    const service = await Services.findOne({name: req.params.id})
+    if (!service) return res.status(404).send("Service not found");
+
+    const posts = await Posts.find({type: req.params.id, likedAt: {$gt: parseInt(req.query.timestamp) || 1}})
+
+    let userCounts = {}
+    posts.forEach(function(post){
+        let username = new URL(post.link).pathname.split("/")[1];
+
+        userCounts[username] = userCounts[username] + 1 || 1;
+    })
+
+    return res.json(Object.fromEntries(Object.entries(userCounts).sort((a, b) => b[1] - a[1])))
 })
 
 async function checkFeeds() {

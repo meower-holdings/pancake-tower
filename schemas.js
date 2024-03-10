@@ -5,7 +5,8 @@ const serviceSchema = new mongoose.Schema({
     display: String,
     url: String,
     rssFeed: String,
-    authorized_ips: Array
+    authorized_ips: Array,
+    useUsercount: Boolean
 });
 const Services = mongoose.model('Service', serviceSchema);
 
