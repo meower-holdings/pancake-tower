@@ -6,10 +6,16 @@ const Parser = require('rss-parser');
 const parser = new Parser();
 const he = require('he');
 const ws = require('ws');
+const https = require('https');
+const fs = require('fs');
 
 const app = express()
 const port = 6654
-const wss = new ws.Server({ port: 6655 });
+const privateKey  = fs.readFileSync('pancake.key', 'utf8');
+const certificate = fs.readFileSync('pancake.crt', 'utf8');
+const credentials = {key: privateKey, cert: certificate};
+const httpsServer = https.createServer(credentials, app)
+const wss = new ws.Server({server: httpsServer, path: "/toebeans"});
 app.use(express.static('public'))
 app.use(bodyParser.json())
 
@@ -59,7 +65,7 @@ app.post("/services/:id", async function(req, res) {
 
     wss.clients.forEach((client) => {
         if (client.readyState === ws.OPEN) {
-            client.send(JSON.stringify({type: req.params.id, link: req.body.link, snippet: req.body.snippet}));
+            client.send(JSON.stringify({type: req.params.id, link: req.body.link, snippet: req.body.snippet, eyecandy: req.body.eyecandy}));
         }
     });
 })
@@ -105,10 +111,9 @@ async function checkFeeds() {
 async function createServer() {
     console.log("Connecting to database...");
     await mongoose.connect(process.env.MONGODB_URL);
-    app.listen(port, () => {
-        console.log(`Pancake Tower on ${port}`)
-        console.log("Websocket on 6655")
-    })
+    
+    httpsServer.listen(port)
+    console.log("Hewwo! ^_^")
 
     checkFeeds()
     setInterval(checkFeeds,10 * 60 * 1000);

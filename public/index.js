@@ -1,5 +1,7 @@
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 let userCountCount = {}
+let comboCount = 0;
+let comboReset;
 
 window.addEventListener("DOMContentLoaded", async function() {
     services = await (await fetch("/services")).json()
@@ -83,7 +85,7 @@ function requestRealtime() {
 function establishRealtime() {
     document.querySelector("#establishingrealtime").style.display = "block";
 
-    const socket = new WebSocket('ws://' + window.location.hostname + ':6655');
+    const socket = new WebSocket('wss://' + window.location.host + '/toebeans');
     socket.onmessage = (event) => {
         if(event.data === "mrrrrp hewwo ^_^ youre cute") {
             document.querySelector("#establishingrealtime").style.display = "none"
@@ -92,10 +94,15 @@ function establishRealtime() {
         }
 
         const trueEventData = JSON.parse(event.data);
-        const notified = new Notification(`Pancake Tower [${trueEventData.type}]`, {body: trueEventData.snippet, icon: `https://www.google.com/s2/favicons?domain=${new URL(trueEventData.link).hostname}&sz=128`});
+        if(comboCount < 5) comboCount += 1;
+        if(comboReset) clearTimeout(comboReset);
+        comboReset = setTimeout(() => comboCount = 0, 60000);
+
+        const notified = new Notification(`[🥞🗼] ${trueEventData.eyecandy.name}`, {body: trueEventData.snippet, icon: trueEventData.eyecandy.icon});
         notified.onclick = (event) => {
             event.preventDefault();
             window.open(trueEventData.link, "_blank");
         };
+        new Audio(`/resources/sfx/captured-${comboCount}.mp3`).play();
     };
 }
