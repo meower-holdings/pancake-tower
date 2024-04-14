@@ -5,13 +5,19 @@ const bodyParser = require("body-parser");
 const Parser = require('rss-parser');
 const parser = new Parser();
 const he = require('he');
-
-require('dotenv').config()
+const ws = require('ws');
 
 const app = express()
 const port = 6654
+const wss = new ws.Server({ port: 6655 });
 app.use(express.static('public'))
 app.use(bodyParser.json())
+
+require('dotenv').config();
+
+wss.on('connection', (ws) => {
+    ws.send("mrrrrp hewwo ^_^ youre cute")
+})
 
 app.get("/services", async function(req, res) {
     const services = await Services.find({$or: [{authorized_ips: req.ip}, {authorized_ips: null}]}).select('-authorized_ips').select('-_id')
@@ -49,7 +55,13 @@ app.post("/services/:id", async function(req, res) {
         duration: req.body.duration
     })
 
-    return res.status(200).send("Post data captured :3")
+    res.status(200).send("Post data captured :3")
+
+    wss.clients.forEach((client) => {
+        if (client.readyState === ws.OPEN) {
+            client.send(JSON.stringify({type: req.params.id, link: req.body.link, snippet: req.body.snippet}));
+        }
+    });
 })
 
 app.get("/services/:id/usercount", async function(req, res) {
@@ -91,9 +103,11 @@ async function checkFeeds() {
 }
 
 async function createServer() {
+    console.log("Connecting to database...");
     await mongoose.connect(process.env.MONGODB_URL);
     app.listen(port, () => {
-        console.log(`Example app listening on port ${port}`)
+        console.log(`Pancake Tower on ${port}`)
+        console.log("Websocket on 6655")
     })
 
     checkFeeds()

@@ -12,5 +12,19 @@
         <div id="services">
             <img src="/resources/throb.gif">
         </div>
+        <div id="realtimemanager" style="display: none">
+            <div id="enablerealtime" style="display: none">
+                <button onclick="requestRealtime()">enable real-time updates</button>
+            </div>
+            <div id="weeehhhh" style="display: none">
+                <i>real-time updates couldn't be enabled as the permission was denied</i>
+            </div>
+            <div id="establishingrealtime" style="display: none">
+                <i>connecting to websocket...</i>
+            </div>
+            <div id="realtimeisenabled" style="display: none">
+                <i>you have real-time updates enabled! just keep the page open<br>(the counters won't update unless you refresh)</i>
+            </div>
+        </div>
     </body>
 </html>
